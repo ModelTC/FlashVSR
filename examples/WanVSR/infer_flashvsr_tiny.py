@@ -174,19 +174,20 @@ def prepare_input_tensor(path: str, scale: float = 4, dtype=torch.bfloat16, devi
 def init_pipeline():
     print(torch.cuda.current_device(), torch.cuda.get_device_name(torch.cuda.current_device()))
     mm = ModelManager(torch_dtype=torch.bfloat16, device="cpu")
+    model_path = "/mnt/afs1/wangshankun/HF_Cache/"
     mm.load_models([
-        "./FlashVSR/diffusion_pytorch_model_streaming_dmd.safetensors",
+        model_path + "FlashVSR/diffusion_pytorch_model_streaming_dmd.safetensors",
     ])
     pipe = FlashVSRTinyPipeline.from_model_manager(mm, device="cuda")
     pipe.denoising_model().LQ_proj_in = Buffer_LQ4x_Proj(in_dim=3, out_dim=1536, layer_num=1).to("cuda", dtype=torch.bfloat16)
-    LQ_proj_in_path = "./FlashVSR/LQ_proj_in.ckpt"
+    LQ_proj_in_path = model_path + "FlashVSR/LQ_proj_in.ckpt"
     if os.path.exists(LQ_proj_in_path):
         pipe.denoising_model().LQ_proj_in.load_state_dict(torch.load(LQ_proj_in_path, map_location="cpu"), strict=True)
     pipe.denoising_model().LQ_proj_in.to('cuda')
 
     multi_scale_channels = [512, 256, 128, 128]
     pipe.TCDecoder = build_tcdecoder(new_channels=multi_scale_channels, new_latent_channels=16+768)
-    mis = pipe.TCDecoder.load_state_dict(torch.load("./FlashVSR/TCDecoder.ckpt"), strict=False)
+    mis = pipe.TCDecoder.load_state_dict(torch.load(model_path + "FlashVSR/TCDecoder.ckpt"), strict=False)
     print(mis)
 
     pipe.to('cuda'); pipe.enable_vram_management(num_persistent_param_in_dit=None)
@@ -198,11 +199,11 @@ def main():
     os.makedirs(RESULT_ROOT, exist_ok=True)
     inputs = [
         "./inputs/example0.mp4",
-        "./inputs/example1.mp4",
-        "./inputs/example2.mp4",
-        "./inputs/example3.mp4",
+        #"./inputs/example1.mp4",
+        # "./inputs/example2.mp4",
+        #"./inputs/example3.mp4",
     ]
-    seed, scale, dtype, device = 0, 4.0, torch.bfloat16, 'cuda'
+    seed, scale, dtype, device = 0, 2.0, torch.bfloat16, 'cuda'
     sparse_ratio = 2.0      # Recommended: 1.5 or 2.0. 1.5 → faster; 2.0 → more stable.
     pipe = init_pipeline()
 

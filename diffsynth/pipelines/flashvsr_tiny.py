@@ -164,16 +164,6 @@ class FlashVSRTinyPipeline(BasePipeline):
         self.prompt_emb_posi = None
         self.ColorCorrector = TorchColorCorrectorWavelet(levels=5)
 
-        print(r"""
-███████╗██╗      █████╗ ███████╗██╗  ██╗██╗   ██╗███████╗█████╗
-██╔════╝██║     ██╔══██╗██╔════╝██║  ██║██║   ██║██╔════╝██╔══██╗
-█████╗  ██║     ███████║███████╗███████║╚██╗ ██╔╝███████╗███████║
-██╔══╝  ██║     ██╔══██║╚════██║██╔══██║ ╚████╔╝ ╚════██║██╔═██║
-██║     ███████╗██║  ██║███████║██║  ██║  ╚██╔╝  ███████║██║  ██║
-╚═╝     ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
-                         ⚡FlashVSR
-""")
-
     def enable_vram_management(self, num_persistent_param_in_dit=None):
         # 仅管理 dit / vae
         dtype = next(iter(self.dit.parameters())).dtype
@@ -235,7 +225,11 @@ class FlashVSRTinyPipeline(BasePipeline):
         使用固定 prompt 生成文本 context，并在 WanModel 中初始化所有 CrossAttention 的 KV 缓存。
         必须在 __call__ 前显式调用一次。
         """
-        prompt_path = "../../examples/WanVSR/prompt_tensor/posi_prompt.pth"
+
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        prompt_path = os.path.join(current_dir, "../../examples/WanVSR/prompt_tensor/posi_prompt_fp32.pth")
+        prompt_path = os.path.abspath(prompt_path)
 
         if self.dit is None:
             raise RuntimeError("请先通过 fetch_models / from_model_manager 初始化 self.dit")
