@@ -228,7 +228,7 @@ class FlashVSRTinyPipeline(BasePipeline):
 
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        prompt_path = os.path.join(current_dir, "../../examples/WanVSR/prompt_tensor/posi_prompt_fp32.pth")
+        prompt_path = os.path.join(current_dir, "../../examples/WanVSR/prompt_tensor/posi_prompt.pth")
         prompt_path = os.path.abspath(prompt_path)
 
         if self.dit is None:
